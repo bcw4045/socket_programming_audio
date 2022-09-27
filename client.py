@@ -15,7 +15,7 @@ class SocketClient:
 
     def socket_access(self, port, ip):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((self.ip, self.port))
+        client_socket.connect((self.ip, self.port))
         print('연결 준비 완료!!')
         return client_socket
 
@@ -83,12 +83,13 @@ class SocketClient:
 
         while True:
             msg = input('서버로 보낼 메시지 : ')
-            self.client_socket.sendall(msg.encode(encoding='utf-8'))
 
-            data = self.client_socket.recv(1024)
-            print('echo response : ', repr(data.decode()))
             if data.decode() == 'end':
                 break
+
+            self.client_socket.sendall(msg.encode(encoding='utf-8'))
+            data = self.client_socket.recv(1024)
+            print('echo response : ', repr(data.decode()))
 
         self.client_socket.close()
 

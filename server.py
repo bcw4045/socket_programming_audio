@@ -59,10 +59,11 @@ class SocketServer:
         while True:
             data = conn.recv(1024)
             data = data.decode()
-            data += ' echo'
+            msg = data + ' echo'
+            conn.sendall(msg.encode(encoding='utf-8'))
             if data == 'end/':
                 break
-            conn.sendall(data.encode(encoding='utf-8'))
+
 
         time.sleep(5)
         self.server_socket.close()
