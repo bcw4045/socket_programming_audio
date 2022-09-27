@@ -59,9 +59,11 @@ class SocketServer:
         while True:
             data = conn.recv(1024)
             data = data.decode()
+            print('받은 메시지 : ', data)
             msg = data + ' echo'
             conn.sendall(msg.encode(encoding='utf-8'))
             if data == 'end/':
+                print('연결 종료...')
                 break
 
 
