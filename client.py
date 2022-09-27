@@ -84,7 +84,7 @@ class SocketClient:
         while True:
             msg = input('서버로 보낼 메시지 : ')
 
-            if data.decode() == 'end':
+            if msg == 'end/':
                 break
 
             self.client_socket.sendall(msg.encode(encoding='utf-8'))
