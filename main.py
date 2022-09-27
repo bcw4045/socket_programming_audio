@@ -22,7 +22,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     port = int(args.port)
-    ip = int(args.ip)
+    ip = args.ip
 
     if args.user == 'client':
         client = client.SocketClient(port, ip)
