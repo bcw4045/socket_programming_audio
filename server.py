@@ -18,6 +18,9 @@ class SocketServer:
         self.frames = []
         self.p = pyaudio.PyAudio
 
+    def __del__(self):
+        self.server_socket.close()
+
     def socket_access(self, port, ip):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.ip, self.port))
@@ -28,7 +31,7 @@ class SocketServer:
     #     receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
     #
     #     receive_data = []
-    #     while True: # 송신받은 음성 재생
+    #     while True: # 송신 받은 음성 재생
     #        # if not data:
     #         #     break
     #         data = self.server_socket.recv(1024)
@@ -67,5 +70,4 @@ class SocketServer:
                 break
 
 
-        time.sleep(5)
-        self.server_socket.close()
+        time.sleep(1)
