@@ -21,11 +21,14 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    port = int(args.port)
+    ip = int(args.ip)
+
     if args.user == 'client':
-        client = client.SocketClient(args.port, args.ip)
+        client = client.SocketClient(port, ip)
         client.echo_test()
     else:
-        server = server.SocketServer(args.port, args.ip)
+        server = server.SocketServer(port, ip)
         server.echo_test()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
