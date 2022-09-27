@@ -1,3 +1,7 @@
+import pyaudio
+import socket
+import numpy as np
+
 class SocketClient:
 
     def __init__(self, port, ip):
@@ -12,6 +16,7 @@ class SocketClient:
     def socket_access(self, port, ip):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.ip, self.port))
+        print('연결 준비 완료!!')
         return client_socket
 
     def record_audio(self):
