@@ -1,4 +1,5 @@
 import socket
+import time
 from _thread import *
 import argparse
 import numpy as np
@@ -52,11 +53,16 @@ class SocketServer:
 
 
     def echo_test(self):
+        conn, addr = self.server_socket.accept()
+        print('connected by ', addr)
+
         while True:
-            conn, addr = self.server_socket.accept()
-            print('connected by ', addr)
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                conn.sendall('echo'+data)
+            data = conn.recv(1024)
+            data = data.decode()
+            data += ' echo'
+            if data == 'end/':
+                break
+            conn.sendall(data.encode(encoding='utf-8'))
+
+        time.sleep(5)
+        self.server_socket.close()
