@@ -112,36 +112,12 @@ class AudioServer(Socket):
 
         self.receive_audio()
         print('수신 성공 .....')
-        self.send_audio()
-        print('송신 성공 ......')
+        if self.frames.decode() == 'end':
+            print('연결 종료....')
+            return
+        else:
+            self.send_audio()
+            print('송신 성공 ......')
 
-        while True:
-            data = conn.recv(1024)
-            data = data.decode()
-            print('받은 메시지 : ', data)
-            msg = data + ' echo'
-            conn.sendall(msg.encode(encoding='utf-8'))
-            if data == 'end/':
-                print('연결 종료...')
-                break
+            time.sleep(1)
 
-        time.sleep(1)
-
-
-
-
-
-        while True:
-            commend = input('명령어를 입력하세요 : ')
-
-            if commend == 'record':
-                self.record_audio()
-            elif commend == 'listen':
-                self.listening_audio()
-            else:
-                self.send_audio()
-                print('오디오 전송 성공...')
-                self.receive_audio()
-
-            if commend == 'end':
-                break

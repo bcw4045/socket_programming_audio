@@ -25,10 +25,10 @@ if __name__ == '__main__':
     ip = args.ip
 
     if args.user == 'client':
-        client = client.SocketClient(port, ip)
+        client = client.AudioClient(port, ip)
         client.echo_test()
     else:
-        server = server.SocketServer(port, ip)
+        server = server.AudioServer(port, ip)
         server.echo_test()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
