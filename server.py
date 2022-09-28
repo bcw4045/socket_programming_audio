@@ -18,7 +18,7 @@ class AudioServer:
         self.chunk = chunk
         self.fs = fs
         self.frames = []
-        self.p = p
+        self.p = p()
 
     def socket_access(self, port, ip):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
