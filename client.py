@@ -27,7 +27,7 @@ class AudioClient:
 
     def record_audio(self):
         print(f'Recode Starting')
-        stream = self.p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+        stream = self.p.open(self, format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
 
         for i in range(0, int(self.fs/self.chunk * 3)): # 시간 초를 정해두고 녹음 받음
             data = stream.read(self.chunk)

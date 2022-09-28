@@ -27,6 +27,7 @@ class AudioServer:
         return server_socket
 
     def send_audio(self):
+        conn, addr = self.server_socket.accept()
         full_data = []
         with wave.open('arrive/file.wav', 'rb') as f:
             stream = self.p.open(format=self.p.get_format_from_width(f.getsampwidth()),
@@ -42,6 +43,7 @@ class AudioServer:
     def receive_audio(self): # 오디오를 받아서 저장
         receive_data = b''
         while True:
+            conn, addr = self.server_socket.accept()
             data = self.server_socket.recv(1024)
             if data is None:
                 break
@@ -76,7 +78,7 @@ class AudioServer:
         time.sleep(1)
 
     def audio_test(self):
-        conn, addr = self.server_socket.accept()
+
         print('connected by ', addr)
 
         self.receive_audio()
