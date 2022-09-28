@@ -26,9 +26,9 @@ if __name__ == '__main__':
 
     if args.user == 'client':
         client = client.AudioClient(port, ip)
-        client.echo_test()
+        client.audio_test()
     else:
         server = server.AudioServer(port, ip)
-        server.echo_test()
+        server.audio_test()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
