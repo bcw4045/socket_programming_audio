@@ -9,38 +9,7 @@ import pickle
 import pyaudio
 
 
-class Socket:
-
-    def __init__(self, port, ip):
-        self.port = port
-        self.ip = ip
-        self.socket_stream = self.socket_access(self.port, self.ip)
-        self.chunk = 1024
-        self.fs = 16000
-        self.frames = []
-        self.p = pyaudio.PyAudio
-
-    def __del__(self):
-        self.socket.close()
-
-    def socket_access(self, port, ip):
-        socket_stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket.socket_stream((self.ip, self.port))
-        print('연결 준비 완료!!')
-        return socket_stream
-
-
-    def echo_test(self):
-        while True:
-            msg = input('서버로 보낼 메시지 : ')
-            self.socket_stream.sendall(msg.encode(encoding='utf-8'))
-            data = self.socket_stream.recv(1024)
-            print('echo response : ', repr(data.decode()))
-            if msg == 'end/':
-                break
-
-
-class AudioServer(Socket):
+class AudioServer:
 
     def __init__(self, port, ip, chunk=1024, fs=16000, p=pyaudio.PyAudio):
         self.port = port
@@ -51,7 +20,7 @@ class AudioServer(Socket):
         self.frames = []
         self.p = p
 
-    def socket_access(self, port, ip): # 오버라이딩
+    def socket_access(self, port, ip):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.ip, self.port))
         server_socket.listen(1)
@@ -90,7 +59,7 @@ class AudioServer(Socket):
         waveFile.writeframes(full_data['frames'])
         waveFile.close()
 
-    def echo_test(self): # 오버라이딩
+    def echo_test(self):
         conn, addr = self.server_socket.accept()
         print('connected by ', addr)
 

@@ -4,46 +4,26 @@ import numpy as np
 import pickle
 
 
-class Socket:
+class AudioClient:
 
-    def __init__(self, port, ip):
+    def __init__(self, port, ip, chunk=1024, fs=16000, p=pyaudio.PyAudio):
         self.port = port
         self.ip = ip
-        self.socket_stream = self.socket_access(self.port, self.ip)
+        self.client_socket = self.socket_access(self.port, self.ip)
         self.chunk = 1024
         self.fs = 16000
         self.frames = []
         self.p = pyaudio.PyAudio
 
+
     def __del__(self):
-        self.socket.close()
+        self.client_socket.close()
 
     def socket_access(self, port, ip):
-        socket_stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket.socket_stream((self.ip, self.port))
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((self.ip, self.port))
         print('연결 준비 완료!!')
-        return socket_stream
-
-
-    def echo_test(self):
-        while True:
-            msg = input('서버로 보낼 메시지 : ')
-            self.socket_stream.sendall(msg.encode(encoding='utf-8'))
-            data = self.socket_stream.recv(1024)
-            print('echo response : ', repr(data.decode()))
-            if msg == 'end/':
-                break
-
-
-class AudioClient(Socket):
-
-    def __init__(self, port, ip, chunk=1024, fs=16000, p=pyaudio.PyAudio):
-        super.__init__(port, ip)
-        self.client_socket = super.socket_access(self.port, self.ip)
-        self.chunk = chunk
-        self.fs = fs
-        self.frames = []
-        self.p = p
+        return client_socket
 
     def record_audio(self):
         print(f'Recode Starting')
@@ -104,6 +84,16 @@ class AudioClient(Socket):
         self.p.terminate()
 
         print('Finished playback')
+
+
+    def echo_test(self):
+        while True:
+            msg = input('서버로 보낼 메시지 : ')
+            self.client_socket.sendall(msg.encode(encoding='utf-8'))
+            data = self.client_socket.recv(1024)
+            print('echo response : ', repr(data.decode()))
+            if msg == 'end/':
+                break
 
     def audio_test(self): # 작업중...
         while True:
