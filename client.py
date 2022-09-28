@@ -1,43 +1,45 @@
 import pyaudio
 import socket
 import numpy as np
+import pickle
 
 
-class SocketClient:
+class Socket:
 
     def __init__(self, port, ip):
         self.port = port
         self.ip = ip
-        self.client_socket = self.socket_access(self.port, self.ip)
+        self.socket_stream = self.socket_access(self.port, self.ip)
         self.chunk = 1024
         self.fs = 16000
         self.frames = []
         self.p = pyaudio.PyAudio
 
     def __del__(self):
-        self.client_socket.close()
+        self.socket.close()
 
     def socket_access(self, port, ip):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.ip, self.port))
+        socket_stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket.socket_stream((self.ip, self.port))
         print('연결 준비 완료!!')
-        return client_socket
+        return socket_stream
 
 
     def echo_test(self):
         while True:
             msg = input('서버로 보낼 메시지 : ')
-            self.client_socket.sendall(msg.encode(encoding='utf-8'))
-            data = self.client_socket.recv(1024)
+            self.socket_stream.sendall(msg.encode(encoding='utf-8'))
+            data = self.socket_stream.recv(1024)
             print('echo response : ', repr(data.decode()))
             if msg == 'end/':
                 break
 
 
-class AudioModule(SocketClient):
+class AudioClient(Socket):
 
     def __init__(self, port, ip, chunk=1024, fs=16000, p=pyaudio.PyAudio):
         super.__init__(port, ip)
+        self.client_socket = super.socket_access(self.port, self.ip)
         self.chunk = chunk
         self.fs = fs
         self.frames = []
@@ -63,7 +65,6 @@ class AudioModule(SocketClient):
             return 0
         else:
             sound = np.array(self.frames)
-
             sound_bytes = sound.tobytes()
             stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
             stream2.write(sound_bytes)
@@ -79,23 +80,22 @@ class AudioModule(SocketClient):
             self.record_audio()
 
         else:
-            for i in range(0, len(self.frames), 1024):
-                if (i + 1024) > len(self.frames):
-                    data = self.frames[i:]
-                else:
-                    data = self.frames[i, i + 1024]
-                self.client_socket.send_all(data)
+            d = {
+                'framse' : b''.join(self.frames),
+                'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
+            }
+            msg = pickle.dumps(d)
+            self.client_socket.send(msg)
+            print('전송 완료....')
 
 
     def receive_audio(self):
         receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
 
-        receive_data = []
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
             if data is None:
                 break
-            receive_data.append(data)
             receive_stream.write(data)
 
 
@@ -109,6 +109,9 @@ class AudioModule(SocketClient):
         while True:
             commend = input('명령어를 입력하세요 : ')
 
+            if commend == 'end':
+                break
+
             if commend == 'record':
                 self.record_audio()
             elif commend == 'listen':
@@ -118,5 +121,4 @@ class AudioModule(SocketClient):
                 print('오디오 전송 성공...')
                 self.receive_audio()
 
-            if commend == 'end':
-                break
+
