@@ -79,8 +79,6 @@ class AudioServer:
 
     def audio_test(self):
 
-        print('connected by ', addr)
-
         self.receive_audio()
         print('수신 성공 .....')
         if self.frames.decode() == 'end':
