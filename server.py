@@ -52,8 +52,8 @@ class AudioServer:
         print('전송 받은 프레임의 타입 : ', type(self.frames))
 
         # save the audio
-        waveFile =wave.open('arrive/file.wav', 'wb')
-        waveFile.setchannels(1)
+        waveFile = wave.open('arrive/file.wav', 'wb')
+        waveFile.setnchannels(1)
         waveFile.setsampwidth(full_data['sample_size'])
         waveFile.setframerate(self.fs)
         waveFile.writeframes(full_data['frames'])

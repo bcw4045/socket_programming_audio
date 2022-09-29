@@ -14,7 +14,8 @@ class AudioClient:
         self.fs = 16000
         self.frames = []
         self.p = pyaudio.PyAudio()
-
+        self.input_device = None
+        self.output_device = None
 
     def __del__(self):
         self.client_socket.close()
@@ -25,9 +26,31 @@ class AudioClient:
         print('연결 준비 완료!!')
         return client_socket
 
+    def set_input_device(self):
+        input_info = self.p.get_host_api_info_by_index(0)
+        input_device = input_info.get('deviceCount')
+        for i in range(0, input_device):
+            if (self.p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print("Input Device id ", i, " ‑ ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
+
+        self.input_device = int(input('녹음에 사용할 디바이스의 번호를 입력해주세요 : '))
+
+    def set_output_device(self):
+        output_info = self.p.get_host_api_info_by_index(0)
+        output_device = output_info.get('deviceCount')
+        for i in range(0, output_device):
+            if (self.p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print("Output Device id ", i, " ‑ ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
+
+        self.output_device = int(input('재생에 사용할 디바이스의 번호를 입력해주세요 : '))
+
+
     def record_audio(self):
+        self.set_input_device()
         print(f'Recode Starting')
-        stream = self.p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+        stream = self.p.open(format=pyaudio.paInt16, channels=1,
+                             rate=16000, input=True, frames_per_buffer=1024,
+                             input_device_index=self.input_device)
 
         for i in range(0, int(self.fs/self.chunk * 3)): # 시간 초를 정해두고 녹음 받음
             data = stream.read(self.chunk)
@@ -40,13 +63,16 @@ class AudioClient:
         print(f'Recode Finishing')
 
     def listening_audio(self):
+        self.set_input_device()
         if len(self.frames) == 0:
             print('현재 저장된 녹음이 없습니다....')
             return 0
         else:
             sound = np.array(self.frames)
             sound_bytes = sound.tobytes()
-            stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
+            stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
+                                  rate=self.fs, output=True,
+                                  output_device_index=self.output_device)
             stream2.write(sound_bytes)
             stream2.stop_stream()
             stream2.close()
