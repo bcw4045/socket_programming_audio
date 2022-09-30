@@ -27,20 +27,22 @@ class AudioClient:
         return client_socket
 
     def set_input_device(self):
-        input_info = self.p.get_host_api_info_by_index(0)
+        audio = pyaudio.PyAudio()
+        input_info = audio.get_host_api_info_by_index(0)
         input_device = input_info.get('deviceCount')
         for i in range(0, input_device):
-            if (self.p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                print("Input Device id ", i, " ‑ ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print("Input Device id ", i, " ‑ ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
 
         self.input_device = int(input('녹음에 사용할 디바이스의 번호를 입력해주세요 : '))
 
     def set_output_device(self):
-        output_info = self.p.get_host_api_info_by_index(0)
+        audio = pyaudio.PyAudio()
+        output_info = audio.get_host_api_info_by_index(0)
         output_device = output_info.get('deviceCount')
         for i in range(0, output_device):
-            if (self.p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                print("Output Device id ", i, " ‑ ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print("Output Device id ", i, " ‑ ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
 
         self.output_device = int(input('재생에 사용할 디바이스의 번호를 입력해주세요 : '))
 
@@ -95,7 +97,7 @@ class AudioClient:
             print('전송 완료....')
 
 
-    def receive_audio(self):
+    def receive_audio(self): # 오디오
         receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
 
         while True: # 송신받은 음성 재생
@@ -139,5 +141,6 @@ class AudioClient:
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()
+                print('오디오 수신 성공....')
 
 

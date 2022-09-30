@@ -45,7 +45,7 @@ class AudioServer:
             data = conn.recv(1024)
             if data is None:
                 break
-            receive_data = data + receive_data
+            receive_data = receive_data + data
 
         full_data = pickle.loads(receive_data)
         self.frames = full_data['frames']
