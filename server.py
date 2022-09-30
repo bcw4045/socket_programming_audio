@@ -43,9 +43,6 @@ class AudioServer:
         receive_data = b''
         while True:
             data = conn.recv(1024)
-            print(data)
-            if repr(data.decode()) == 'end':
-                break
             receive_data = receive_data + data
 
         full_data = pickle.loads(receive_data)
@@ -77,6 +74,7 @@ class AudioServer:
         time.sleep(1)
 
     def audio_test(self):
+        self.server_socket.settimeout(1.0)
         conn, addr = self.server_socket.accept()
         print('connected by ', addr)
 
