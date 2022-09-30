@@ -94,6 +94,8 @@ class AudioClient:
             }
             msg = pickle.dumps(d)
             self.client_socket.send(msg)
+            time.sleep(1)
+            self.client_socket.send('end'.encode())
             print('전송 완료....')
 
 
