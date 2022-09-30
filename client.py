@@ -65,7 +65,7 @@ class AudioClient:
         print(f'Recode Finishing')
 
     def listening_audio(self):
-        self.set_input_device()
+        self.set_output_device()
         if len(self.frames) == 0:
             print('현재 저장된 녹음이 없습니다....')
             return 0
