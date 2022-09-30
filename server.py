@@ -44,7 +44,7 @@ class AudioServer:
         while True:
             data = conn.recv(1024)
             print(data)
-            if data.decode() == 'end':
+            if repr(data.decode()) == 'end':
                 break
             receive_data = receive_data + data
 
