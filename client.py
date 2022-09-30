@@ -2,7 +2,7 @@ import pyaudio
 import socket
 import numpy as np
 import pickle
-
+import time
 
 class AudioClient:
 
@@ -94,7 +94,6 @@ class AudioClient:
             }
             msg = pickle.dumps(d)
             self.client_socket.send(msg)
-            self.client_socket.send(b'end')
             print('전송 완료....')
 
 

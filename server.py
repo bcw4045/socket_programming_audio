@@ -44,7 +44,7 @@ class AudioServer:
         while True:
             data = conn.recv(1024)
             print(data)
-            if not data:
+            if len(data) == 0:
                 break
             receive_data = receive_data + data
 
@@ -82,12 +82,12 @@ class AudioServer:
 
         self.receive_audio(conn)
         print('수신 성공 .....')
-        if self.frames.decode() == 'end':
-            print('연결 종료....')
-            return
-        else:
-            self.send_audio(conn)
-            print('송신 성공 ......')
+        # if self.frames.decode() == 'end':
+        #     print('연결 종료....')
+        #     return
+        # else:
+        self.send_audio(conn)
+        print('송신 성공 ......')
 
-            time.sleep(1)
+        time.sleep(1)
 
