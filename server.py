@@ -43,12 +43,13 @@ class AudioServer:
         receive_data = b''
         while True:
             try:
-                self.server_socket.settimeout(1.0)
+                self.server_socket.settimeout(3.0)
                 data = conn.recv(1024)
-                self.server_socket.settimeout(None)
                 receive_data = receive_data + data
             except:
                 break
+
+        self.server_socket.settimeout(None)
 
         full_data = pickle.loads(receive_data)
         self.frames = full_data['frames']
