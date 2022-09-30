@@ -41,7 +41,7 @@ class AudioClient:
         output_info = audio.get_host_api_info_by_index(0)
         output_device = output_info.get('deviceCount')
         for i in range(0, output_device):
-            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxOutputChannels')) > 0:
                 print("Output Device id ", i, " ‑ ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
 
         self.output_device = int(input('재생에 사용할 디바이스의 번호를 입력해주세요 : '))
@@ -94,6 +94,7 @@ class AudioClient:
             }
             msg = pickle.dumps(d)
             self.client_socket.send(msg)
+            self.client_socket.send(b'end')
             print('전송 완료....')
 
 
