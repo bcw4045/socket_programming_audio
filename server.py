@@ -41,7 +41,7 @@ class AudioServer:
 
     def receive_audio(self, conn): # 오디오를 받아서 저장
         msg_length = conn.recv(1024).decode()
-        print(msg_length.decode())
+        print(msg_length)
 
         receive_data = b''
 
