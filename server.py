@@ -93,5 +93,4 @@ class AudioServer:
         self.send_audio(conn)
         print('송신 성공 ......')
 
-        time.sleep(1)
 
