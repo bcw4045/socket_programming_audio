@@ -44,9 +44,9 @@ class AudioServer:
 
         while True:
             data = conn.recv(1024)
-            receive_data = receive_data + data
-            if not data:
+            if data == b'end':
                 break
+            receive_data = receive_data + data
 
         print('여기까지 도착...1')
         full_data = pickle.loads(receive_data)
