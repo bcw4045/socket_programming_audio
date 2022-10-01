@@ -93,9 +93,10 @@ class AudioClient:
                 'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
             }
             msg = pickle.dumps(d)
-            self.client_socket.sendall(str(len(d['frames'])).encode(encoding='utf-8'))
-            time.sleep(1)
             self.client_socket.send(msg)
+            time.sleep(1)
+            self.client_socket.sendall(b'')
+
             print('전송 완료....')
 
 

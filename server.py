@@ -40,16 +40,13 @@ class AudioServer:
                 conn.send(data)
 
     def receive_audio(self, conn): # 오디오를 받아서 저장
-        msg_length = conn.recv(1024).decode()
-        msg_length = int(msg_length)
-        print(msg_length)
-
         receive_data = b''
 
-        for i in range(0, msg_length+1, 1024):
+        while True:
             data = conn.recv(1024)
             receive_data = receive_data + data
-            print(i)
+            if not data:
+                break
 
         print('여기까지 도착...1')
         full_data = pickle.loads(receive_data)
