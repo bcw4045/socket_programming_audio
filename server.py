@@ -47,9 +47,13 @@ class AudioServer:
             receive_data = receive_data + data
             data = conn.recv(1024)
 
-
+        print('여기까지 도착...1')
         full_data = pickle.loads(receive_data)
+
+        print('여기까지 도착...2')
         self.frames = full_data['frames']
+
+        print('여기까지 도착...3')
         print('전송 받은 프레임의 타입 : ', type(self.frames))
 
         # save the audio
