@@ -93,7 +93,7 @@ class AudioClient:
                 'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
             }
             msg = pickle.dumps(d)
-            self.client_socket.send(msg)
+            self.client_socket.sendall(msg)
             time.sleep(1)
             self.client_socket.sendall(b'end')
 
@@ -101,11 +101,14 @@ class AudioClient:
 
 
     def receive_audio(self): # 오디오
-        receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1, rate=self.fs, output=True)
+        if self.set_output_device() is None:
+            self.set_output_device()
+        receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
+                                     rate=self.fs, output=True, output_device_index=self.output_device)
 
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
-            if data is None:
+            if data:
                 break
             receive_stream.write(data)
 

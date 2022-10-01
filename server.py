@@ -29,16 +29,18 @@ class AudioServer:
     def send_audio(self, conn):
         full_data = []
         with wave.open('arrive/file.wav', 'rb') as f:
-            stream = self.p.open(format=self.p.get_format_from_width(f.getsampwidth()),
-                                 channels=1,
-                                 rate=self.fs,
-                                 output=True
-                                 )
+            # stream = self.p.open(format=self.p.get_format_from_width(f.getsampwidth()),
+            #                      channels=1,
+            #                      rate=self.fs,
+            #                      output=True
+            #                      )
             data = 1
             while data:
                 data = f.readframes(self.chunk)
                 conn.send(data)
 
+        time.sleep(1)
+        conn.sendall(b'end')
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
 
@@ -48,13 +50,10 @@ class AudioServer:
                 break
             receive_data = receive_data + data
 
-        print('여기까지 도착...1')
         full_data = pickle.loads(receive_data)
 
-        print('여기까지 도착...2')
         self.frames = full_data['frames']
 
-        print('여기까지 도착...3')
         print('전송 받은 프레임의 타입 : ', type(self.frames))
 
         # save the audio
