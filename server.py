@@ -41,12 +41,14 @@ class AudioServer:
 
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
-        data = conn.recv(1024)
 
-        while data:
-            print(data)
-            receive_data = receive_data + data
+        while True:
             data = conn.recv(1024)
+            receive_data = receive_data + data
+            if not data:
+                print('break')
+                break
+            print(data)
 
         print('여기까지 도착...1')
         full_data = pickle.loads(receive_data)
