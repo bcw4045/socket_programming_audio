@@ -89,7 +89,7 @@ class AudioClient:
 
         else:
             d = {
-                'framse' : b''.join(self.frames),
+                'frames' : b''.join(self.frames),
                 'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
             }
             msg = pickle.dumps(d)
