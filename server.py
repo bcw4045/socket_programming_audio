@@ -41,11 +41,11 @@ class AudioServer:
 
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
-        while True:
+        data = conn.recv(1024)
+        while data:
             try:
-                self.server_socket.settimeout(3.0)
-                data = conn.recv(1024)
                 receive_data = receive_data + data
+                data = conn.recv(1024)
             except:
                 break
 
