@@ -44,6 +44,7 @@ class AudioServer:
         data = conn.recv(1024)
 
         while data:
+            print(data)
             receive_data = receive_data + data
             data = conn.recv(1024)
 
