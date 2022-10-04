@@ -29,13 +29,9 @@ class AudioServer:
     def send_audio(self, conn):
         full_data = []
         with wave.open('arrive/file.wav', 'rb') as f:
-            # stream = self.p.open(format=self.p.get_format_from_width(f.getsampwidth()),
-            #                      channels=1,
-            #                      rate=self.fs,
-            #                      output=True
-            #                      )
             data = 1
             while data:
+                print(data)
                 data = f.readframes(self.chunk)
                 conn.send(data)
 
@@ -86,11 +82,8 @@ class AudioServer:
 
         self.receive_audio(conn)
         print('수신 성공 .....')
-        # if self.frames.decode() == 'end':
-        #     print('연결 종료....')
-        #     return
-        # else:
         self.send_audio(conn)
         print('송신 성공 ......')
+
 
 

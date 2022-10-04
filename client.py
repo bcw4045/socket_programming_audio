@@ -135,7 +135,7 @@ class AudioClient:
 
             if commend == 'end':
                 break
-            if commend == 'record':
+            elif commend == 'record':
                 try:
                     self.record_audio()
                 except:
