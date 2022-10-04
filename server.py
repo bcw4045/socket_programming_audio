@@ -31,7 +31,6 @@ class AudioServer:
         with wave.open('arrive/file.wav', 'rb') as f:
             data = 1
             while data:
-                print(data)
                 data = f.readframes(self.chunk)
                 conn.send(data)
 
