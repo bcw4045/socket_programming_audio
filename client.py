@@ -3,6 +3,7 @@ import socket
 import numpy as np
 import pickle
 import time
+import keyboard
 
 class AudioClient:
 
@@ -54,7 +55,9 @@ class AudioClient:
                              rate=16000, input=True, frames_per_buffer=1024,
                              input_device_index=self.input_device)
 
-        for i in range(0, int(self.fs/self.chunk * 3)): # 시간 초를 정해두고 녹음 받음
+        while True: # 시간 초를 정해두고 녹음 받음
+            if keyboard.is_pressed('q'):
+                break
             data = stream.read(self.chunk)
             self.frames.append(data)
 

@@ -1,69 +1,107 @@
+import argparse
+
 import numpy as np
 import pyaudio
 import wave
+import time
+
+from server import AudioServer
+from client import AudioClient
 
 
-def record_audio():
-    device_count = set_input_device()
-    p = pyaudio.PyAudio()
-    frames = []
-    print(f'Recode Starting')
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000,
-                    input=True, frames_per_buffer=1024,
-                    input_device_index=device_count)
+def server_echo_test(port, ip):
+    server = AudioServer(port, ip)
 
-    for i in range(0, int(1024 / 1024 * 30)):  # 시간 초를 정해두고 녹음 받음
-        data = stream.read(1024)
-        frames.append(data)
+    conn, addr = server.server_socket.accept()
+    print('connected by ', addr)
 
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    while True:
+        data = conn.recv(1024)
+        data = data.decode()
+        print('받은 메시지 : ', data)
+        msg = data + ' echo'
+        conn.sendall(msg.encode(encoding='utf-8'))
+        if data == 'end/':
+            print('연결 종료...')
+            break
 
-    print(f'Recode Finishing')
-    return frames
-
-
-def listening_audio():
-    p = pyaudio.PyAudio()
-    frames = record_audio()
-
-    sound = np.array(frames)
-    sound_bytes = sound.tobytes()
-
-    device_count = set_output_device()
-
-    stream2 = p.open(format=p.get_format_from_width(width=2), channels=1, rate=16000, output=True,
-                     output_device_index=device_count)
-    print(len(sound_bytes))
-    stream2.write(sound_bytes)
-    stream2.stop_stream()
-    stream2.close()
-    p.terminate()
-    print(f'저장된 녹음의 재생이 끝났습니다....')
-
-def set_input_device():
-    audio = pyaudio.PyAudio()
-    info = audio.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-        if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            print("Input Device id ", i, " ‑ ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
-
-    device_count = int(input('입력으로 사용할 디바이스의 번호를 입력해주세요 : '))
-    return device_count
-
-def set_output_device():
-    audio = pyaudio.PyAudio()
-    info = audio.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-        if (audio.get_device_info_by_host_api_device_index(0, i).get('maxOutputChannels')) > 0:
-            print("Input Device id ", i, " ‑ ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
-
-    device_count = int(input('출력으로 사용할 디바이스의 번호를 입력해주세요 : '))
-    return device_count
+    time.sleep(1)
+    print('echo test Finished')
 
 
-listening_audio()
+def client_echo_test(port, ip):
+    client = AudioClient(port, ip)
+
+    while True:
+        msg = input('서버로 보낼 메시지 : ')
+        client.client_socket.sendall(msg.encode(encoding='utf-8'))
+        data = client.client_socket.recv(1024)
+        print('echo response : ', repr(data.decode()))
+        if msg == 'end/':
+            break
+
+    print('echo test Finished')
+
+
+def server_audio_test(port, ip):
+    server = AudioServer(port, ip)
+    conn, addr = server.server_socket.accept()
+    print('connected by ', addr)
+
+    server.server_socket.receive_audio(conn)
+    print('수신 성공 .....')
+    server.server_socket.send_audio(conn)
+    print('송신 성공 ......')
+
+
+
+def client_audio_test(port, ip): # 작업중...
+    client = AudioClient(port, ip)
+
+    while True:
+        commend = input('명령어를 입력하세요 : ')
+        if commend == 'end':
+            break
+        elif commend == 'record':
+            try:
+                client.record_audio()
+            except:
+                pass
+        elif commend == 'listen':
+            client.listening_audio()
+        else:
+            client.send_audio()
+            print('오디오 전송 성공...')
+            client.receive_audio()
+            print('오디오 수신 성공....')
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--user', required=True, help='서버와 클라이언트 중에 무엇을 실행시킬지 지정해주세요')
+    parser.add_argument('--port', required=True, help='연결할 서버의 port번호를 지정해주세요.', default=28888) # server port : 28888
+    parser.add_argument('--ip', required=True, help='연결할 서버의 IP 주소를 지정해주세요.') # server ip : 172.17.0.4
+
+    args = parser.parse_args()
+
+    port = int(args.port)
+    ip = args.ip
+
+    flag = input('test 항목을 설정하세요(echo, audio) : ')
+
+    if args.user == 'client':
+        if flag == 'echo':
+            client_echo_test(port, ip)
+        else:
+            client_audio_test(port, ip)
+    else:
+        if flag == 'echo':
+            server_echo_test(port, ip)
+        else:
+            server_audio_test(port, ip)
+
+
+    print('테스트 종료합니다...')
 

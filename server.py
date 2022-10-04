@@ -59,30 +59,19 @@ class AudioServer:
         waveFile.writeframes(full_data['frames'])
         waveFile.close()
 
-    def echo_test(self):
+    def run(self):
         conn, addr = self.server_socket.accept()
-        print('connected by ', addr)
-
         while True:
-            data = conn.recv(1024)
-            data = data.decode()
-            print('받은 메시지 : ', data)
-            msg = data + ' echo'
-            conn.sendall(msg.encode(encoding='utf-8'))
-            if data == 'end/':
-                print('연결 종료...')
-                break
-
-        time.sleep(1)
-
-    def audio_test(self):
-        conn, addr = self.server_socket.accept()
-        print('connected by ', addr)
-
-        self.receive_audio(conn)
-        print('수신 성공 .....')
-        self.send_audio(conn)
-        print('송신 성공 ......')
-
-
-
+            try:
+                commend = conn.recv(1024).decode()
+                if commend == 'end':
+                    conn.shutdown()
+                elif commend == 'test_audio':
+                    self.receive_audio(conn)
+                    print('수신 성공 .....')
+                    self.send_audio(conn)
+                    print('송신 성공 ......')
+                else:
+                    continue
+            except:
+                conn, addr = self.server_socket.accept()
