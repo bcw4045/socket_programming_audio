@@ -46,7 +46,7 @@ class AudioServer:
         while True:
             data = conn.recv(1024)
             print('수신 데이터 : ', data)
-            if not data:
+            if data == b'end':
                 print('receive if 진입')
                 break
             receive_data = receive_data + data
