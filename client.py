@@ -138,7 +138,6 @@ class AudioClient:
         while True:
             commend = input('명령어를 입력하세요 : ')
             if commend == 'end':
-                self.client_socket.sendall(b'end')
                 self.client_socket.close()
                 self.client_socket = None
                 break
@@ -147,7 +146,6 @@ class AudioClient:
             elif commend == 'listen':
                 self.listening_audio()
             else:
-                self.client_socket.sendall(b'audio')
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()
