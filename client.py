@@ -147,7 +147,7 @@ class AudioClient:
             elif commend == 'listen':
                 self.listening_audio()
             else:
-                self.client_socket.sendall(b'testaudio')
+                self.client_socket.sendall(b'audio')
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()

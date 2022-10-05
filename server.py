@@ -66,17 +66,18 @@ class AudioServer:
         conn, addr = self.server_socket.accept()
         while True:
             try:
-                commend = conn.recv(1024).decode()
+                commend = conn.recv(1024)
                 print('전송 받은 명령어 : ', commend)
-                if commend == 'end':
+                if commend == b'end':
                     conn.shutdown()
-                elif commend == 'testaudio':
+                elif commend == b'audio':
                     print('진입 성공...')
                     self.receive_audio(conn)
                     print('수신 성공 .....')
                     self.send_audio(conn)
                     print('송신 성공 ......')
                 else:
+                    print('진입')
                     continue
             except:
                 conn, addr = self.server_socket.accept()
