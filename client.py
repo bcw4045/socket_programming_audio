@@ -103,7 +103,7 @@ class AudioClient:
             msg = pickle.dumps(d)
             self.client_socket.sendall(msg)
             time.sleep(1)
-            self.client_socket.sendall(b'end')
+            # self.client_socket.sendall(b'end')
 
             print('전송 완료....')
 
@@ -117,7 +117,9 @@ class AudioClient:
         receive_data = []
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
-            if data == b'end':
+            print('수신 데이터 : ', data)
+            if not data:
+                print('receive if 진입')
                 break
             receive_stream.write(data)
 

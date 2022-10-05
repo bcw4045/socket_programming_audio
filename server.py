@@ -29,6 +29,7 @@ class AudioServer:
         return server_socket
 
     def send_audio(self, conn):
+        conn, addr = self.server_socket.accept()
         full_data = []
         with wave.open('arrive/file.wav', 'rb') as f:
             data = 1
@@ -44,7 +45,9 @@ class AudioServer:
 
         while True:
             data = conn.recv(1024)
-            if data == b'end':
+            print('수신 데이터 : ', data)
+            if not data:
+                print('receive if 진입')
                 break
             receive_data = receive_data + data
 
@@ -63,7 +66,6 @@ class AudioServer:
         waveFile.close()
 
     def run(self):
-        conn, addr = self.server_socket.accept()
         while True:
             try:
                 self.receive_audio(conn)
