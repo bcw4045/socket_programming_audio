@@ -96,11 +96,12 @@ class AudioClient:
             self.record_audio()
 
         else:
-            d = {
-                'frames' : b''.join(self.frames),
-                'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
-            }
-            msg = pickle.dumps(d)
+            # d = {
+            #     'frames' : b''.join(self.frames),
+            #     'sample_size' : pyaudio.get_sample_size(pyaudio.paInt16)
+            # }
+            # msg = pickle.dumps(d)
+            msg = np.array(self.frames).tobytes()
             self.client_socket.sendall(msg)
             time.sleep(1)
             self.client_socket.sendall(b'end')

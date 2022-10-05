@@ -49,18 +49,18 @@ class AudioServer:
                 break
             receive_data = receive_data + data
 
-        full_data = pickle.loads(receive_data)
-
-        self.frames = full_data['frames']
+        # full_data = pickle.loads(receive_data)
+        #
+        # self.frames = full_data['frames']
 
         # save the audio
         if not os.path.exists('arrive/'):
             os.mkdir('arrive/')
         waveFile = wave.open('arrive/file.wav', 'wb')
         waveFile.setnchannels(1)
-        waveFile.setsampwidth(full_data['sample_size'])
+        waveFile.setsampwidth(pyaudio.get_sample_size(pyaudio.paInt16))
         waveFile.setframerate(self.fs)
-        waveFile.writeframes(full_data['frames'])
+        waveFile.writeframes(receive_data)
         waveFile.close()
 
     def run(self):
