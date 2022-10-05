@@ -115,11 +115,9 @@ class AudioClient:
         receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
                                      rate=self.fs, output=True, output_device_index=self.output_device)
 
-        receive_data = []
+        receive_data = b''
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
-            # if data == b'end':
-            #     break
             if data in b'end':
                 receive_data = receive_data + data.rstrip(b'end')
                 break
