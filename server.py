@@ -29,8 +29,7 @@ class AudioServer:
         return server_socket
 
     def send_audio(self, conn):
-        conn, addr = self.server_socket.accept()
-        full_data = []
+        print('send 진입..')
         with wave.open('arrive/file.wav', 'rb') as f:
             data = 1
             while data:
@@ -64,6 +63,7 @@ class AudioServer:
         waveFile.setframerate(self.fs)
         waveFile.writeframes(full_data['frames'])
         waveFile.close()
+        print('receive end...')
 
     def run(self):
         conn, addr = self.server_socket.accept()
