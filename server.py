@@ -66,6 +66,7 @@ class AudioServer:
         waveFile.close()
 
     def run(self):
+        conn, addr = self.server_socket.accept()
         while True:
             try:
                 self.receive_audio(conn)
