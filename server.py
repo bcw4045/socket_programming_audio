@@ -6,6 +6,7 @@ import numpy as np
 import wave
 import pickle
 import pyaudio
+import os
 
 
 class AudioServer:
@@ -29,7 +30,6 @@ class AudioServer:
         return server_socket
 
     def send_audio(self, conn):
-        print('send 진입..')
         with wave.open('arrive/file.wav', 'rb') as f:
             data = 1
             while data:
@@ -44,9 +44,7 @@ class AudioServer:
 
         while True:
             data = conn.recv(1024)
-            print('수신 데이터 : ', data)
             if data == b'end':
-                print('receive if 진입')
                 break
             receive_data = receive_data + data
 
@@ -54,29 +52,24 @@ class AudioServer:
 
         self.frames = full_data['frames']
 
-        print('전송 받은 프레임의 타입 : ', type(self.frames))
-
         # save the audio
+        if not os.path.exists('arrive/'):
+            os.mkdir('arrive/')
         waveFile = wave.open('arrive/file.wav', 'wb')
-        print('1')
         waveFile.setnchannels(1)
-        print('2')
         waveFile.setsampwidth(full_data['sample_size'])
-        print('3')
         waveFile.setframerate(self.fs)
-        print('4')
         waveFile.writeframes(full_data['frames'])
-        print('5')
         waveFile.close()
-        print('receive end...')
 
     def run(self):
         conn, addr = self.server_socket.accept()
         while True:
-            try:
+            commend = conn.recv(1024)
+            if commend == b'':
+                conn, addr = self.server_socket.accept()
+            else:
                 self.receive_audio(conn)
                 print('수신 성공 .....')
                 self.send_audio(conn)
                 print('송신 성공 ......')
-            except OSError:
-                conn, addr = self.server_socket.accept()

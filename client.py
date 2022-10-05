@@ -117,9 +117,7 @@ class AudioClient:
         receive_data = []
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
-            print('수신 데이터 : ', data)
             if data == b'end':
-                print('receive if 진입')
                 break
             receive_stream.write(data)
 
@@ -148,6 +146,7 @@ class AudioClient:
             elif commend == 'listen':
                 self.listening_audio()
             else:
+                self.client_socket.sendall(b'run')
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()
