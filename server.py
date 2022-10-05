@@ -5,7 +5,6 @@ import argparse
 import numpy as np
 import wave
 import pickle
-
 import pyaudio
 
 
@@ -19,6 +18,9 @@ class AudioServer:
         self.fs = fs
         self.frames = []
         self.p = p()
+
+    def __del__(self):
+        self.server_socket.close()
 
     def socket_access(self, port, ip):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,6 +38,7 @@ class AudioServer:
 
         time.sleep(1)
         conn.sendall(b'end')
+
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
 

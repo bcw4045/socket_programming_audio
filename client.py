@@ -10,7 +10,7 @@ class AudioClient:
     def __init__(self, port, ip, chunk=1024, fs=16000, p=pyaudio.PyAudio):
         self.port = port
         self.ip = ip
-        self.client_socket = self.socket_access(self.port, self.ip)
+        self.client_socket = None
         self.chunk = 1024
         self.fs = 16000
         self.frames = []
@@ -19,13 +19,15 @@ class AudioClient:
         self.output_device = None
 
     def __del__(self):
-        self.client_socket.close()
+        if self.client_socket is not None:
+            self.client_socket.close()
+            self.client_socket = None
 
     def socket_access(self, port, ip):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.ip, self.port))
         print('연결 준비 완료!!')
-        return client_socket
+        self.client_socket = client_socket
 
     def set_input_device(self):
         audio = pyaudio.PyAudio()
@@ -122,34 +124,31 @@ class AudioClient:
 
         print('Finished playback')
 
+    def run(self):
+        print('서버에 연결을 시작합니다...')
+        try:
+            self.socket_access(self.port, self.ip)
+        except:
+            print('서버가 열려있지않습니다. 서버를 열고 다시 시작해주세요...')
+            return
 
-    def echo_test(self):
-        while True:
-            msg = input('서버로 보낼 메시지 : ')
-            self.client_socket.sendall(msg.encode(encoding='utf-8'))
-            data = self.client_socket.recv(1024)
-            print('echo response : ', repr(data.decode()))
-            if msg == 'end/':
-                break
-
-    def audio_test(self): # 작업중...
         while True:
             commend = input('명령어를 입력하세요 : ')
-
             if commend == 'end':
+                self.client_socket.sendall(b'end')
+                self.client_socket.close()
+                self.client_socket = None
                 break
             elif commend == 'record':
-                try:
-                    self.record_audio()
-                except:
-                    pass
-
+                self.record_audio()
             elif commend == 'listen':
                 self.listening_audio()
             else:
+                self.client_socket.sendall(b'test_audio')
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()
                 print('오디오 수신 성공....')
+
 
 

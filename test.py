@@ -54,7 +54,6 @@ def server_audio_test(port, ip):
     print('송신 성공 ......')
 
 
-
 def client_audio_test(port, ip): # 작업중...
     client = AudioClient(port, ip)
 
