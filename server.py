@@ -70,7 +70,8 @@ class AudioServer:
                 print('전송 받은 명령어 : ', commend)
                 if commend == 'end':
                     conn.shutdown()
-                elif commend == 'test_audio':
+                elif commend == 'testaudio':
+                    print('진입 성공...')
                     self.receive_audio(conn)
                     print('수신 성공 .....')
                     self.send_audio(conn)

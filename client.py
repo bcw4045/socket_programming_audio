@@ -56,6 +56,7 @@ class AudioClient:
                              rate=16000, input=True, frames_per_buffer=1024,
                              input_device_index=self.input_device)
 
+        self.frames = []
         print(f'Recode Starting')
 
         while True: # 시간 초를 정해두고 녹음 받음
@@ -146,7 +147,7 @@ class AudioClient:
             elif commend == 'listen':
                 self.listening_audio()
             else:
-                self.client_socket.sendall(b'test_audio')
+                self.client_socket.sendall(b'testaudio')
                 self.send_audio()
                 print('오디오 전송 성공...')
                 self.receive_audio()
