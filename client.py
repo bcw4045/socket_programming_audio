@@ -121,7 +121,7 @@ class AudioClient:
             # if data == b'end':
             #     break
             if data in b'end':
-                receive_data = receive_data + data.rstrip(b'end')
+                receive_data = receive_data + list(data.rstrip(b'end'))
                 break
             receive_stream.write(data)
 
