@@ -67,6 +67,7 @@ class AudioServer:
         while True:
             try:
                 commend = conn.recv(1024).decode()
+                print('전송 받은 명령어 : ', commend)
                 if commend == 'end':
                     conn.shutdown()
                 elif commend == 'test_audio':

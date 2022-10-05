@@ -52,10 +52,11 @@ class AudioClient:
 
     def record_audio(self):
         self.set_input_device()
-        print(f'Recode Starting')
         stream = self.p.open(format=pyaudio.paInt16, channels=1,
                              rate=16000, input=True, frames_per_buffer=1024,
                              input_device_index=self.input_device)
+
+        print(f'Recode Starting')
 
         while True: # 시간 초를 정해두고 녹음 받음
             if keyboard.is_pressed('q'):
@@ -63,11 +64,12 @@ class AudioClient:
             data = stream.read(self.chunk)
             self.frames.append(data)
 
+        print(f'Recode Finishing')
         stream.stop_stream()
         stream.close()
         self.p.terminate()
 
-        print(f'Recode Finishing')
+
 
     def listening_audio(self):
         self.set_output_device()
