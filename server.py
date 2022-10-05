@@ -58,10 +58,15 @@ class AudioServer:
 
         # save the audio
         waveFile = wave.open('arrive/file.wav', 'wb')
+        print('1')
         waveFile.setnchannels(1)
+        print('2')
         waveFile.setsampwidth(full_data['sample_size'])
+        print('3')
         waveFile.setframerate(self.fs)
+        print('4')
         waveFile.writeframes(full_data['frames'])
+        print('5')
         waveFile.close()
         print('receive end...')
 
