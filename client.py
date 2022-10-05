@@ -102,7 +102,7 @@ class AudioClient:
             # }
             # msg = pickle.dumps(d)
             msg = np.array(self.frames).tobytes()
-            self.client_socket.sendall(msg)
+            self.client_socket.sendall(b''.join(msg))
             time.sleep(1)
             self.client_socket.sendall(b'end')
 
