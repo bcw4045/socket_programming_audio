@@ -90,6 +90,7 @@ class AudioClient:
             print(f'저장된 녹음의 재생이 끝났습니다....')
 
 
+    #여기서부터 시작
     def send_audio(self):
         if len(self.frames) == 0:
             print('전송할 오디오가 없습니다...')
@@ -102,7 +103,7 @@ class AudioClient:
             # }
             # msg = pickle.dumps(d)
             msg = np.array(self.frames).tobytes()
-            self.client_socket.sendall(b''.join(msg))
+            self.client_socket.sendall(msg)
             time.sleep(1)
             self.client_socket.sendall(b'end')
 

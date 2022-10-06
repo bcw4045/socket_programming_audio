@@ -39,6 +39,7 @@ class AudioServer:
         time.sleep(1)
         conn.sendall(b'end')
 
+    # 여기서부터 시작
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
 
@@ -69,6 +70,7 @@ class AudioServer:
             commend = conn.recv(1024)
             if commend == b'':
                 conn, addr = self.server_socket.accept()
+                print(f'{addr} 클라이언트가 서버에 접속하였습니다...')
             else:
                 self.receive_audio(conn)
                 print('수신 성공 .....')
