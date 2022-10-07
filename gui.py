@@ -3,12 +3,14 @@ from _thread import *
 import argparse
 import numpy as np
 import pyaudio
+from PyQt5.QtCore import QBasicTimer
+
 import client
 import server
 
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow, QLabel, \
-    QLineEdit, QGridLayout
+    QLineEdit, QGridLayout, QProgressBar
 
 
 class MyApp(QWidget):
@@ -19,37 +21,107 @@ class MyApp(QWidget):
     def initUI(self):
         self.setWindowTitle('Socket programming')
 
-        main_layout = QGridLayout()
+        # self.statusBar().showMessage('Disconnect...')
+
+        main_layout = QVBoxLayout()
 
         self.setLayout(main_layout)
 
         ###### port, ip 입력하는 레이아웃
-
         port_label = QLabel('Port', self)
         ip_label = QLabel('Ip', self)
 
         port_line = QLineEdit(self)
         ip_line = QLineEdit(self)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(port_label)
-        vbox.addWidget(port_line)
+        vbox_label = QVBoxLayout()
+        vbox_label.addWidget(port_label)
+        vbox_label.addWidget(port_line)
 
-        vbox.addWidget(ip_label)
-        vbox.addWidget(ip_line)
+        vbox_label.addWidget(ip_label)
+        vbox_label.addWidget(ip_line)
 
-        ######################################
+        ##################################################
 
+        ############### connect/disconnect layout ###############
+
+        vbox_button = QVBoxLayout()
         conn_button = QPushButton('Connect', self)
+        disconn_button = QPushButton('Disconnect', self)
 
-        main_layout.addLayout(vbox, 0, 0)
-        main_layout.addWidget(conn_button, 0, 1)
+        vbox_button.addWidget(conn_button)
+        vbox_button.addWidget(disconn_button)
+
+        ######################################################
+
+        ############ 상단 레이아웃 ###############
+        top_layout = QHBoxLayout()
+        top_layout.addStretch(1)
+        top_layout.addLayout(vbox_label)
+        top_layout.addStretch(2)
+        top_layout.addLayout(vbox_button)
+        top_layout.addStretch(1)
+
+        #########################################
+
+        ####### 녹음, 음성, 전송 버튼 생성 ###########
+        hbox_button = QHBoxLayout()
+        record_button = QPushButton('녹음하기', self)
+        listen_button = QPushButton('재생하기', self)
+        transfer_button = QPushButton('전송하기', self)
+
+        hbox_button.addStretch(1)
+        hbox_button.addWidget(record_button)
+        hbox_button.addStretch(1)
+        hbox_button.addWidget(listen_button)
+        hbox_button.addStretch(1)
+
+        ###########################################
+
+        ############## progressbar #################
+        self.pbr = QProgressBar(self)
+        self.pbr.setValue(24)
+        # self.timer = QBasicTimer()
+        # self.finished = False
+        ###########################################
+
+        ############ 상태 라벨 추가 ############
+        status_layout = QVBoxLayout()
+
+        conn_layout = QHBoxLayout()
+        self.conn_status = QLabel('연결 상태 -> ', self)
+        self.conn_label = QLabel('Disconnect....', self)
 
 
-        # self. statusBar().showMessage('Ready')
+        record_layout = QHBoxLayout()
+        self.record_status = QLabel('현재 녹음된 음성 -> ', self)
+        self.record_label = QLabel('없음...', self)
+
+        conn_layout.addWidget(self.conn_status)
+        conn_layout.addWidget(self.conn_label)
+
+        record_layout.addWidget(self.record_status)
+        record_layout.addWidget(self.record_label)
+
+        status_layout.addLayout(conn_layout)
+        status_layout.addLayout(record_layout)
+        #######################################
+
+
+        main_layout.addLayout(top_layout)
+        main_layout.addStretch(1)
+        main_layout.addLayout(hbox_button)
+        main_layout.addStretch(1)
+        main_layout.addWidget(self.pbr)
+        main_layout.addStretch(1)
+        main_layout.addWidget(transfer_button)
+        main_layout.addStretch(1)
+        main_layout.addLayout(status_layout)
+
+
         self.setGeometry(300, 300, 300, 200)
         self.move(300, 300)
-        self.resize(400, 200)
+        self.resize(500, 300)
         self.show()
 
 

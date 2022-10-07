@@ -42,7 +42,6 @@ class AudioServer:
     # 여기서부터 시작
     def receive_audio(self, conn): # 오디오를 받아서 저장
         receive_data = b''
-
         while True:
             data = conn.recv(1024)
             if data in b'end':
