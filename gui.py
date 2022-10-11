@@ -10,7 +10,7 @@ import server
 
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow, QLabel, \
-    QLineEdit, QGridLayout, QProgressBar
+    QLineEdit, QGridLayout, QProgressBar, QMessageBox
 
 
 class MyApp(QWidget):
@@ -31,15 +31,15 @@ class MyApp(QWidget):
         port_label = QLabel('Port', self)
         ip_label = QLabel('Ip', self)
 
-        port_line = QLineEdit(self)
-        ip_line = QLineEdit(self)
+        self.port_line = QLineEdit(self)
+        self.ip_line = QLineEdit(self)
 
         vbox_label = QVBoxLayout()
         vbox_label.addWidget(port_label)
-        vbox_label.addWidget(port_line)
+        vbox_label.addWidget(self.port_line)
 
         vbox_label.addWidget(ip_label)
-        vbox_label.addWidget(ip_line)
+        vbox_label.addWidget(self.ip_line)
 
         ##################################################
 
@@ -48,6 +48,7 @@ class MyApp(QWidget):
         vbox_button = QVBoxLayout()
         conn_button = QPushButton('Connect', self)
         disconn_button = QPushButton('Disconnect', self)
+        disconn_button.setEnabled(False)
 
         vbox_button.addWidget(conn_button)
         vbox_button.addWidget(disconn_button)
@@ -69,6 +70,9 @@ class MyApp(QWidget):
         record_button = QPushButton('녹음하기', self)
         listen_button = QPushButton('재생하기', self)
         transfer_button = QPushButton('전송하기', self)
+
+        listen_button.setEnabled(False)
+        transfer_button.setEnabled(False)
 
         hbox_button.addStretch(1)
         hbox_button.addWidget(record_button)
@@ -123,6 +127,19 @@ class MyApp(QWidget):
         self.move(300, 300)
         self.resize(500, 300)
         self.show()
+
+    def clicked_connect(self): # 연결시에 이벤트 설정
+        port = self.port_line.text()
+        ip = self.ip_line.text()
+
+        self.AudioClient = client.AudioClient(port, ip)
+        try:
+            self.AudioClient.socket_access()
+        except:
+            QMessageBox.critical(self, "QMessageBox", "Port와 IP가 올바르지 않아 연결되지 않았습니다. 다시 연결해주세요...")
+            self.port_line.clear()
+            self.ip_line.clear()
+            return
 
 
 if __name__ == '__main__':
