@@ -46,12 +46,15 @@ class MyApp(QWidget):
         ############### connect/disconnect layout ###############
 
         vbox_button = QVBoxLayout()
-        conn_button = QPushButton('Connect', self)
-        disconn_button = QPushButton('Disconnect', self)
-        disconn_button.setEnabled(False)
+        self.conn_button = QPushButton('Connect', self)
+        self.disconn_button = QPushButton('Disconnect', self)
+        self.disconn_button.setEnabled(False)
 
-        vbox_button.addWidget(conn_button)
-        vbox_button.addWidget(disconn_button)
+        self.conn_button.clicked.connect(self.clicked_connect)
+        self.disconn_button.clicked.connect(self.clicked_disconn)
+
+        vbox_button.addWidget(self.conn_button)
+        vbox_button.addWidget(self.disconn_button)
 
         ######################################################
 
@@ -67,17 +70,18 @@ class MyApp(QWidget):
 
         ####### 녹음, 음성, 전송 버튼 생성 ###########
         hbox_button = QHBoxLayout()
-        record_button = QPushButton('녹음하기', self)
-        listen_button = QPushButton('재생하기', self)
-        transfer_button = QPushButton('전송하기', self)
+        self.record_button = QPushButton('녹음하기', self)
+        self.listen_button = QPushButton('재생하기', self)
+        self.transfer_button = QPushButton('전송하기', self)
 
-        listen_button.setEnabled(False)
-        transfer_button.setEnabled(False)
+        self.listen_button.setEnabled(False)
+        self.transfer_button.setEnabled(False)
+        self.record_button.setEnabled(False)
 
         hbox_button.addStretch(1)
-        hbox_button.addWidget(record_button)
+        hbox_button.addWidget(self.record_button)
         hbox_button.addStretch(1)
-        hbox_button.addWidget(listen_button)
+        hbox_button.addWidget(self.listen_button)
         hbox_button.addStretch(1)
 
         ###########################################
@@ -118,7 +122,7 @@ class MyApp(QWidget):
         main_layout.addStretch(1)
         main_layout.addWidget(self.pbr)
         main_layout.addStretch(1)
-        main_layout.addWidget(transfer_button)
+        main_layout.addWidget(self.transfer_button)
         main_layout.addStretch(1)
         main_layout.addLayout(status_layout)
 
@@ -128,9 +132,20 @@ class MyApp(QWidget):
         self.resize(500, 300)
         self.show()
 
+
+    ############## 서버 연결 이벤트 ###################
+
     def clicked_connect(self): # 연결시에 이벤트 설정
-        port = self.port_line.text()
-        ip = self.ip_line.text()
+        try:
+            port = int(self.port_line.text())
+            ip = self.ip_line.text()
+
+        except:
+            QMessageBox.critical(self, "QMessageBox", "잘못된 형식의 port와 ip입니다...")
+            self.port_line.clear()
+            self.ip_line.clear()
+            return
+
 
         self.AudioClient = client.AudioClient(port, ip)
         try:
@@ -140,6 +155,35 @@ class MyApp(QWidget):
             self.port_line.clear()
             self.ip_line.clear()
             return
+
+        self.conn_label.setText('Connected....')
+        self.disconn_button.setEnabled(True)
+        self.conn_button.setEnabled(False)
+
+        self.record_button.setEnabled(True)
+
+        return
+
+    def clicked_disconn(self):
+        self.AudioClient.__del__()
+        self.port_line.clear()
+        self.ip_line.clear()
+        self.conn_label.setText('Disconnect....')
+        self.disconn_button.setEnabled(False)
+        self.conn_button.setEnabled(True)
+
+        self.record_button.setEnabled(False)
+
+    #################################################################
+
+
+    ################# 녹음, 재생, 전송 이벤트 ############################
+
+    # def clicked_record(self):
+
+
+    ##################################################################
+
 
 
 if __name__ == '__main__':

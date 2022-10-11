@@ -23,7 +23,7 @@ class AudioClient:
             self.client_socket.close()
             self.client_socket = None
 
-    def socket_access(self, port, ip):
+    def socket_access(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.ip, self.port))
         print('연결 준비 완료!!')
