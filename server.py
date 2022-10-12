@@ -68,6 +68,7 @@ class AudioServer:
         while True:
             commend = conn.recv(1024)
             if commend == b'':
+                print(f'{addr} 클라이언트가 서버에서 접속을 종료하였습니다...')
                 conn, addr = self.server_socket.accept()
                 print(f'{addr} 클라이언트가 서버에 접속하였습니다...')
             else:

@@ -1,22 +1,92 @@
 import socket
 from _thread import *
 import argparse
+
+import keyboard
 import numpy as np
 import pyaudio
-from PyQt5.QtCore import QBasicTimer
+from PyQt5.QtCore import QBasicTimer, QThread, pyqtSignal, pyqtSlot
 
 import client
 import server
 
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QMainWindow, QLabel, \
-    QLineEdit, QGridLayout, QProgressBar, QMessageBox
+    QLineEdit, QGridLayout, QProgressBar, QMessageBox, QInputDialog
 
+
+class Audio_Client(client.AudioClient):
+    def __init__(self, port, ip):
+        super().__init__(port, ip)
+
+    # 메소드 오버라이딩
+    def set_input_device(self):
+        audio = pyaudio.PyAudio()
+        input_info = audio.get_host_api_info_by_index(0)
+        input_device = input_info.get('deviceCount')
+
+        items = []
+        for i in range(0, input_device):
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                items.append(f"Input Device id  {i} ‑ {audio.get_device_info_by_host_api_device_index(0, i).get('name')}")
+        return items
+
+    #메소드 오버라이딩
+    def set_output_device(self):
+        audio = pyaudio.PyAudio()
+        input_info = audio.get_host_api_info_by_index(0)
+        input_device = input_info.get('deviceCount')
+
+        items = []
+        for i in range(0, input_device):
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxOutputChannels')) > 0:
+                items.append(
+                    f"Input Device id  {i} ‑ {audio.get_device_info_by_host_api_device_index(0, i).get('name')}")
+        return items
+
+    # 메소드 오버라이딩
+    def record_audio(self, device):
+        stream = self.p.open(format=pyaudio.paInt16, channels=1,
+                             rate=16000, input=True, frames_per_buffer=1024,
+                             input_device_index=device)
+
+        self.frames = []
+        print(f'Recode Starting')
+
+        while True: # 시간 초를 정해두고 녹음 받음
+            if keyboard.is_pressed('q'):
+                break
+            data = stream.read(self.chunk)
+            self.frames.append(data)
+
+        print(f'Recode Finishing')
+        stream.stop_stream()
+        stream.close()
+        self.p.terminate()
+
+
+    # 메소드 오버라이딩
+    def listening_audio(self, device):
+        if len(self.frames) == 0:
+            print('현재 저장된 녹음이 없습니다....')
+            return 0
+        else:
+            sound = np.array(self.frames)
+            sound_bytes = sound.tobytes()
+            stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
+                                  rate=self.fs, output=True,
+                                  output_device_index=device)
+            stream2.write(sound_bytes)
+            stream2.stop_stream()
+            stream2.close()
+            self.p.terminate()
+            print(f'저장된 녹음의 재생이 끝났습니다....')
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.record = RecordWindow()
 
     def initUI(self):
         self.setWindowTitle('Socket programming')
@@ -84,6 +154,8 @@ class MyApp(QWidget):
         hbox_button.addWidget(self.listen_button)
         hbox_button.addStretch(1)
 
+        self.record_button.clicked.connect(self.clicked_record)
+
         ###########################################
 
         ############## progressbar #################
@@ -147,7 +219,7 @@ class MyApp(QWidget):
             return
 
 
-        self.AudioClient = client.AudioClient(port, ip)
+        self.AudioClient = Audio_Client(port, ip)
         try:
             self.AudioClient.socket_access()
         except:
@@ -179,10 +251,80 @@ class MyApp(QWidget):
 
     ################# 녹음, 재생, 전송 이벤트 ############################
 
-    # def clicked_record(self):
+    def record_audio(self, input_device):
+        p = pyaudio.PyAudio()
+        stream = p.open(format=pyaudio.paInt16, channels=1,
+                             rate=16000, input=True, frames_per_buffer=1024,
+                             input_device_index=input_device)
 
+        self.frames = []
+        print(f'Recode Starting')
+
+        while True: # 시간 초를 정해두고 녹음 받음
+            if keyboard.is_pressed('q'):
+                break
+            data = stream.read(self.chunk)
+            self.frames.append(data)
+
+        print(f'Recode Finishing')
+        stream.stop_stream()
+        stream.close()
+        self.p.terminate()
+
+    def set_device(self, input):
+        if input:
+            items = self.AudioClient.set_input_device()
+            item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
+        else:
+            items = self.AudioClient.set_output_device()
+            item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
+
+        if ok:
+            return item_data
+
+
+    def clicked_record(self):
+        self.frames = []
+        self.Record = RecordWindow()
+        device = self.set_device(True)
+
+        self.Record.buffer.connect(self.buffer)
+
+        finish = QMessageBox.information(self, 'Record', 'Recorded....', QMessageBox.)
+
+        self.Record.start()
+
+
+        # self.AudioClient.record_audio()
 
     ##################################################################
+
+    @pyqtSlot(int)
+    def buffer(self, data):
+        self.frames.append(data)
+
+class RecordWindow(QThread):
+    buffer = pyqtSignal(int)
+
+    def __init__(self):
+        super().__init__()
+        self.running = True
+
+    def run(self, device):
+        p = pyaudio.PyAudio()
+        stream = p.open(format=pyaudio.paInt16, channels=1,
+                        rate=16000, input=True, frames_per_buffer=1024,
+                        input_device_index=device)
+
+        while self.running: # 시간 초를 정해두고 녹음 받음
+            data = stream.read(self.chunk)
+            self.buffer.emit(data)
+
+    def pause(self):
+        self.running = False
+
+
+
 
 
 
