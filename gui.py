@@ -86,7 +86,6 @@ class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.record = RecordWindow()
 
     def initUI(self):
         self.setWindowTitle('Socket programming')
@@ -275,24 +274,37 @@ class MyApp(QWidget):
         if input:
             items = self.AudioClient.set_input_device()
             item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
+            device_count = item_data.split(" ")[4]
+            print(device_count)
         else:
             items = self.AudioClient.set_output_device()
             item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
-
+            device_count = item_data.split(" ")[4]
+            print(device_count)
         if ok:
-            return item_data
+            return int(device_count)
 
 
     def clicked_record(self):
         self.frames = []
-        self.Record = RecordWindow()
+
         device = self.set_device(True)
+        self.Record = RecordWindow(device)
 
         self.Record.buffer.connect(self.buffer)
 
-        finish = QMessageBox.information(self, 'Record', 'Recorded....', QMessageBox.)
+        finish = QMessageBox.information(self, 'Record', 'Recorded....', QMessageBox.SaveAll)
 
         self.Record.start()
+
+        while True:
+            if finish == QMessageBox.SaveAll:
+                self.Record.pause()
+                break
+
+            else:
+                self.buffer()
+        print(self.frames)
 
 
         # self.AudioClient.record_audio()
@@ -306,15 +318,16 @@ class MyApp(QWidget):
 class RecordWindow(QThread):
     buffer = pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, device):
         super().__init__()
         self.running = True
+        self.device = device
 
-    def run(self, device):
+    def run(self):
         p = pyaudio.PyAudio()
         stream = p.open(format=pyaudio.paInt16, channels=1,
                         rate=16000, input=True, frames_per_buffer=1024,
-                        input_device_index=device)
+                        input_device_index=self.device)
 
         while self.running: # 시간 초를 정해두고 녹음 받음
             data = stream.read(self.chunk)
