@@ -1,4 +1,5 @@
 import socket
+import time
 from _thread import *
 import argparse
 
@@ -45,17 +46,52 @@ class Audio_Client(client.AudioClient):
         return items
 
     # 메소드 오버라이딩
-    def listening_audio(self, device):
-        sound = np.array(self.frames)
+    def listening_audio(self, device, frames):
+        sound = np.array(frames)
         sound_bytes = sound.tobytes()
         stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
                               rate=self.fs, output=True,
                               output_device_index=device)
+        print(sound_bytes)
         stream2.write(sound_bytes)
         stream2.stop_stream()
         stream2.close()
         self.p.terminate()
         print(f'저장된 녹음의 재생이 끝났습니다....')
+
+
+    # 메소드 오버라이딩
+    def send_audio(self, frames):
+        self.frames = frames
+        msg = np.array(self.frames).tobytes()
+        self.client_socket.sendall(msg)
+        time.sleep(1)
+        self.client_socket.sendall(b'end')
+
+        print('전송 완료....')
+
+    #메소드 오버라이딩
+    def receive_audio(self, device): # 오디오
+        receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
+                                     rate=self.fs, output=True, output_device_index=device)
+
+        receive_data = b''
+        while True: # 송신받은 음성 재생
+            data = self.client_socket.recv(1024)
+            if data in b'end':
+                receive_data = receive_data + data.rstrip(b'end')
+                break
+            receive_stream.write(data)
+
+        receive_stream.stop_stream()
+        receive_stream.close()
+        self.p.terminate()
+
+        print('Finished playback')
+
+
+
+
 
 class MyApp(QWidget):
     def __init__(self):
@@ -219,6 +255,8 @@ class MyApp(QWidget):
         self.conn_button.setEnabled(True)
 
         self.record_button.setEnabled(False)
+        self.listen_button.setEnabled(False)
+        self.transfer_button.setEnabled(False)
 
     #################################################################
     ################# 디바이스 선택 메소드 #########################
@@ -270,6 +308,16 @@ class MyApp(QWidget):
         finish = QMessageBox.information(self, 'Record', 'Recorded....', QMessageBox.SaveAll)
         self.Record.pause()
 
+        print(len(self.frames))
+        self.record_label.setText("녹음된 음성이 있습니다..")
+
+        if len(self.frames) == 0:
+            return
+        else:
+            self.listen_button.setEnabled(True)
+            self.transfer_button.setEnabled(True)
+
+
     @pyqtSlot(bytes)
     def buffer(self, data):
         self.frames.append(data)
@@ -278,12 +326,13 @@ class MyApp(QWidget):
     ####################### 재생 이벤트 ###############################
     def clicked_listen(self):
         device = self.set_device(False)
-        self.AudioClient.listening_audio(device)
+        self.AudioClient.listening_audio(device, self.frames)
         QMessageBox.information(self, 'inform', '녹음된 음성이 모두 재생되었습니다....', QMessageBox.Yes)
 
-
-
-
+    ##################################################################
+    #
+    # def clicked_transfer(self):
+    #     self.AudioClient.send_audio(self.frames)
 
 
 
@@ -322,7 +371,7 @@ class RecordWindow(QThread):
             if self.running == False:
                 stream.stop_stream()
                 stream.close()
-                self.p.terminate()
+                p.terminate()
                 break
             data = stream.read(1024)
             self.buffer.emit(data)
