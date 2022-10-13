@@ -295,15 +295,24 @@ class MyApp(QWidget):
 
         finish = QMessageBox.information(self, 'Record', 'Recorded....', QMessageBox.SaveAll)
 
-        self.Record.start()
 
-        while True:
-            if finish == QMessageBox.SaveAll:
-                self.Record.pause()
-                break
 
-            else:
-                self.buffer()
+
+
+
+
+
+
+        #
+        # self.Record.start()
+        #
+        # while True:
+        #     if finish == QMessageBox.SaveAll:
+        #         self.Record.pause()
+        #         break
+        #
+        #     else:
+        #         self.buffer()
         print(self.frames)
 
 
