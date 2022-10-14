@@ -285,13 +285,22 @@ class MyApp(QWidget):
         self.transfer_button.setEnabled(False)
         self.stop_button.setEnabled(False)
 
+        self.record_label.setText('없음...')
+
     #################################################################
 
     ################# 디바이스 선택 메소드 #########################
     def set_device(self, input):
         if input:
             items = self.AudioClient.set_input_device()
+<<<<<<< HEAD
             return items
+=======
+            if len(items) == 0:
+                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
+                return -1
+            item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
+>>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
 
             # if len(items) == 0:
             #     QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
@@ -302,6 +311,7 @@ class MyApp(QWidget):
             # print(device_count)
         else:
             items = self.AudioClient.set_output_device()
+<<<<<<< HEAD
             return items
         #     if len(items) == 0:
         #         QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
@@ -312,6 +322,17 @@ class MyApp(QWidget):
         #     print(device_count)
         # if ok:
         #     return int(device_count)
+=======
+            if len(items) == 0:
+                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
+                return -1
+            item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
+
+            device_count = item_data.split(" ")[4]
+            print(device_count)
+        if ok:
+            return int(device_count)
+>>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
     #####################################################
 
     def config_device(self):
@@ -339,7 +360,11 @@ class MyApp(QWidget):
         self.frames = []
         self.stop = False
 
+<<<<<<< HEAD
         device = self.input_device
+=======
+        device = self.set_device(True)
+>>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
         if device == -1:
             return
         self.Record = RecordWindow(device)
