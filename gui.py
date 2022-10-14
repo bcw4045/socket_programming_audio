@@ -53,7 +53,6 @@ class Audio_Client(client.AudioClient):
         stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
                               rate=self.fs, output=True,
                               output_device_index=device)
-        print(sound_bytes)
         stream2.write(sound_bytes)
         stream2.stop_stream()
         stream2.close()
@@ -184,6 +183,7 @@ class MyApp(QWidget):
 
         self.transfer_button.setEnabled(False)
         self.listen_button.setEnabled(False)
+        self.config.setEnabled(False)
 
         hbox2.addStretch(1)
         hbox2.addWidget(self.transfer_button)
@@ -267,8 +267,7 @@ class MyApp(QWidget):
         self.conn_label.setText('Connected....')
         self.disconn_button.setEnabled(True)
         self.conn_button.setEnabled(False)
-
-        self.record_button.setEnabled(True)
+        self.config.setEnabled(True)
 
         return
 
@@ -284,72 +283,32 @@ class MyApp(QWidget):
         self.listen_button.setEnabled(False)
         self.transfer_button.setEnabled(False)
         self.stop_button.setEnabled(False)
+        self.record_listen_button.setEnabled(False)
+        self.config.setEnabled(False)
 
         self.record_label.setText('없음...')
 
     #################################################################
 
-    ################# 디바이스 선택 메소드 #########################
-    def set_device(self, input):
-        if input:
-            items = self.AudioClient.set_input_device()
-<<<<<<< HEAD
-            return items
-=======
-            if len(items) == 0:
-                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-                return -1
-            item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
->>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
-
-            # if len(items) == 0:
-            #     QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-            #     return -1
-            # item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
-            #
-            # device_count = item_data.split(" ")[4]
-            # print(device_count)
-        else:
-            items = self.AudioClient.set_output_device()
-<<<<<<< HEAD
-            return items
-        #     if len(items) == 0:
-        #         QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-        #         return -1
-        #     item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
-        #
-        #     device_count = item_data.split(" ")[4]
-        #     print(device_count)
-        # if ok:
-        #     return int(device_count)
-=======
-            if len(items) == 0:
-                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-                return -1
-            item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
-
-            device_count = item_data.split(" ")[4]
-            print(device_count)
-        if ok:
-            return int(device_count)
->>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
     #####################################################
 
     def config_device(self):
-        input_items = self.set_device(True)
-        output_items = self.set_device(False)
-
-        # print(input_items)
         configwindow = ConfigWindow()
 
         configwindow.input_signal.connect(self.input_signal)
         configwindow.output_signal.connect(self.output_signal)
 
+        # print('exec 전 : ', self.input_device)
         configwindow.exec_()
+        if self.input_device == -1 and self.output_device == -1:
+            QMessageBox.critical(self, 'error', '장치가 올바르게 설정되지 않았습니다...', QMessageBox.Yes)
+        else:
+            self.record_button.setEnabled(True)
 
     @pyqtSlot(int)
     def input_signal(self, text):
         self.input_device = text
+
 
     @pyqtSlot(int)
     def output_signal(self, text):
@@ -360,14 +319,8 @@ class MyApp(QWidget):
         self.frames = []
         self.stop = False
 
-<<<<<<< HEAD
-        device = self.input_device
-=======
-        device = self.set_device(True)
->>>>>>> d1c5458d65a9b25a1a45cfa33eebf66be15dbf2f
-        if device == -1:
-            return
-        self.Record = RecordWindow(device)
+        print('device : ', self.input_device)
+        self.Record = RecordWindow(self.input_device)
 
         self.Record.buffer.connect(self.buffer)
 
@@ -403,27 +356,16 @@ class MyApp(QWidget):
         QMessageBox.information(self, 'inform', '녹음된 음성이 모두 재생되었습니다....', QMessageBox.Yes)
 
     ##################################################################
-    #
-    # def clicked_transfer(self):
-    #     self.AudioClient.send_audio(self.frames)
+
+    ###################### 전송 이벤트 ##############################
+
+    def clicked_transfer(self):
+        self.AudioClient.send_audio(self.frames)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ##### Record Thread와 Config Dialog ################
 
 
 class RecordWindow(QThread):
@@ -436,10 +378,12 @@ class RecordWindow(QThread):
 
     def run(self):
         p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16, channels=1,
-                        rate=16000, input=True, frames_per_buffer=1024,
-                        input_device_index=self.device)
-
+        try:
+            stream = p.open(format=pyaudio.paInt16, channels=1,
+                            rate=16000, input=True, frames_per_buffer=1024,
+                            input_device_index=self.device)
+        except:
+            print('error')
         while True: # 시간 초를 정해두고 녹음 받음
             if self.running == False:
                 stream.stop_stream()
@@ -459,6 +403,8 @@ class ConfigWindow(QDialog):
     def __init__(self):
         super(ConfigWindow, self).__init__()
         self.initUI()
+        self.input_device=-1
+        self.output_device = -1
 
     def initUI(self):
         self.setWindowTitle('Device Configuration')
@@ -469,9 +415,6 @@ class ConfigWindow(QDialog):
         main_layout = QVBoxLayout(self)
         input_layout = QHBoxLayout(self)
         output_layout = QHBoxLayout(self)
-
-
-        self.setLayout(main_layout)
 
         input_label = QLabel("Input Device : ", self)
         output_label = QLabel("Output Device : ", self)
@@ -499,20 +442,35 @@ class ConfigWindow(QDialog):
         main_layout.addLayout(output_layout)
         main_layout.addWidget(self.yes)
 
-        self.yes.clicked.connect(self.close)
+        self.setLayout(main_layout)
 
-
+        self.yes.clicked.connect(self.clicked_yes)
         self.setGeometry(300, 300, 300, 200)
         self.show()
 
     def InputonActivated(self, text):
         self.input_combo.setCurrentText(text)
-        self.input_signal.emit(text)
+
 
     def OutputonActivated(self, text):
         self.output_combo.setCurrentText(text)
-        self.output_signal.emit(text)
 
+
+    def clicked_yes(self):
+        output_device = self.output_combo.currentText()
+        self.output_device = output_device.split(' ')[4]
+        self.output_signal.emit(self.output_device)
+
+        input_device = self.input_combo.currentText()
+        self.input_device = input_device.split(' ')[4]
+        self.input_signal.emit(self.input_device)
+
+        self.close()
+
+    def closeEvent(self, QCloseEvent): # real signature unknown; restored from __doc__
+        if self.input_device == -1 and self.output_device == -1:
+            self.input_signal.emit(-1)
+            self.output_signal.emit(-1)
 
 
     def set_input_device(self):
