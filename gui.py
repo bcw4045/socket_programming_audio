@@ -258,6 +258,8 @@ class MyApp(QWidget):
         self.listen_button.setEnabled(False)
         self.transfer_button.setEnabled(False)
 
+        self.record_label.setText('없음...')
+
     #################################################################
     ################# 디바이스 선택 메소드 #########################
     def set_device(self, input):
@@ -265,7 +267,7 @@ class MyApp(QWidget):
             items = self.AudioClient.set_input_device()
             if len(items) == 0:
                 QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-                return 0
+                return -1
             item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
 
             device_count = item_data.split(" ")[4]
@@ -274,7 +276,7 @@ class MyApp(QWidget):
             items = self.AudioClient.set_output_device()
             if len(items) == 0:
                 QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
-                return 0
+                return -1
             item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
 
             device_count = item_data.split(" ")[4]
@@ -308,7 +310,7 @@ class MyApp(QWidget):
         self.frames = []
 
         device = self.set_device(True)
-        if device == 0:
+        if device == -1:
             return
         self.Record = RecordWindow(device)
 
