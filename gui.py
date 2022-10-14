@@ -263,12 +263,20 @@ class MyApp(QWidget):
     def set_device(self, input):
         if input:
             items = self.AudioClient.set_input_device()
+            if len(items) == 0:
+                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
+                return 0
             item_data, ok = QInputDialog.getItem(self, 'Set Input Device', '입력에 사용할 디바이스를 선택해주세요...', items)
+
             device_count = item_data.split(" ")[4]
             print(device_count)
         else:
             items = self.AudioClient.set_output_device()
+            if len(items) == 0:
+                QMessageBox.critical(self, 'error','인식된 장치가 없습니다.', buttons=QMessageBox.Yes)
+                return 0
             item_data, ok = QInputDialog.getItem(self, 'Set Output Device', '출력에 사용할 디바이스를 선택해주세요...', items)
+
             device_count = item_data.split(" ")[4]
             print(device_count)
         if ok:
@@ -300,6 +308,8 @@ class MyApp(QWidget):
         self.frames = []
 
         device = self.set_device(True)
+        if device == 0:
+            return
         self.Record = RecordWindow(device)
 
         self.Record.buffer.connect(self.buffer)
