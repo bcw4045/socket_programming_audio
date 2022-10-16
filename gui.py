@@ -72,23 +72,16 @@ class Audio_Client(client.AudioClient):
         print('전송 완료....')
 
     #메소드 오버라이딩
-    def receive_audio(self, device): # 오디오
-        receive_stream = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
-                                     rate=self.fs, output=True, output_device_index=device)
-
+    def receive_audio(self): # 오디오
         receive_data = b''
         while True: # 송신받은 음성 재생
             data = self.client_socket.recv(1024)
+
             if data in b'end':
                 receive_data = receive_data + data.rstrip(b'end')
                 break
-            receive_stream.write(data)
-
-        receive_stream.stop_stream()
-        receive_stream.close()
-        self.p.terminate()
-
-        print('Finished playback')
+            receive_data += data
+        return receive_data
 
 
 
@@ -185,6 +178,9 @@ class MyApp(QWidget):
         self.listen_button.setEnabled(False)
         self.config.setEnabled(False)
 
+        self.transfer_button.clicked.connect(self.clicked_transfer)
+        self.listen_button.clicked.connect(self.clicked_transfer_listen)
+
         hbox2.addStretch(1)
         hbox2.addWidget(self.transfer_button)
         hbox2.addStretch(1)
@@ -195,8 +191,8 @@ class MyApp(QWidget):
         ############################################
 
         ############## progressbar #################
-        self.pbr = QProgressBar(self)
-        self.pbr.setValue(24)
+        # self.pbr = QProgressBar(self)
+        # self.pbr.setValue(24)
         # self.timer = QBasicTimer()
         # self.finished = False
         ###########################################
@@ -228,8 +224,8 @@ class MyApp(QWidget):
         main_layout.addStretch(1)
         main_layout.addLayout(hbox_button)
         main_layout.addStretch(1)
-        main_layout.addWidget(self.pbr)
-        main_layout.addStretch(1)
+        # main_layout.addWidget(self.pbr)
+        # main_layout.addStretch(1)
         main_layout.addLayout(hbox2)
         main_layout.addStretch(1)
         main_layout.addLayout(status_layout)
@@ -327,6 +323,7 @@ class MyApp(QWidget):
         self.Record.start()
         self.stop_button.setEnabled(True)
         self.record_button.setEnabled(False)
+        self.record_listen_button.setEnabled(False)
 
 
     @pyqtSlot(bytes)
@@ -361,11 +358,25 @@ class MyApp(QWidget):
 
     def clicked_transfer(self):
         self.AudioClient.send_audio(self.frames)
+        QMessageBox.information(self, '전송 알림', '전송이 완료되었습니다.....', QMessageBox.Yes)
+        self.receive_data = self.AudioClient.receive_audio()
+        print(len(self.receive_data))
+        if len(self.receive_data) == 0:
+            QMessageBox.critical(self, 'error', '전송 후 받은 파일이 없습니다....', QMessageBox.Yes)
+        else:
+            print('check')
+            self.listen_button.setEnabled(True)
+    ################################################################
+
+    #################### 전송된 음성 재생 이벤트 #####################
+    def clicked_transfer_listen(self):
+        device = self.output_device
+        self.AudioClient.listening_audio(device, self.receive_data)
+        QMessageBox.information(self, 'inform', '전송 받은 음성이 모두 재생되었습니다....', QMessageBox.Yes)
+    #############################################################
 
 
-
-
-    ##### Record Thread와 Config Dialog ################
+##### Record Thread와 Config Dialog ################
 
 
 class RecordWindow(QThread):
@@ -458,11 +469,11 @@ class ConfigWindow(QDialog):
 
     def clicked_yes(self):
         output_device = self.output_combo.currentText()
-        self.output_device = output_device.split(' ')[4]
+        self.output_device = int(output_device.split(' ')[4])
         self.output_signal.emit(self.output_device)
 
         input_device = self.input_combo.currentText()
-        self.input_device = input_device.split(' ')[4]
+        self.input_device = int(input_device.split(' ')[4])
         self.input_signal.emit(self.input_device)
 
         self.close()
@@ -505,7 +516,7 @@ class ConfigWindow(QDialog):
             items = self.set_output_device()
             return items
 
-
+###################################################################
 
 if __name__ == '__main__':
    app = QApplication(sys.argv)
