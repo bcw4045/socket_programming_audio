@@ -315,7 +315,6 @@ class MyApp(QWidget):
         self.frames = []
         self.stop = False
 
-        print('device : ', self.input_device)
         self.Record = RecordWindow(self.input_device)
 
         self.Record.buffer.connect(self.buffer)
@@ -334,7 +333,7 @@ class MyApp(QWidget):
     def clicked_stop(self):
         self.Record.pause()
         self.stop_button.setEnabled(False)
-        print(len(self.frames))
+
         self.record_label.setText("녹음된 음성이 있습니다..")
 
         if len(self.frames) == 0:
@@ -360,11 +359,10 @@ class MyApp(QWidget):
         self.AudioClient.send_audio(self.frames)
         QMessageBox.information(self, '전송 알림', '전송이 완료되었습니다.....', QMessageBox.Yes)
         self.receive_data = self.AudioClient.receive_audio()
-        print(len(self.receive_data))
+
         if len(self.receive_data) == 0:
             QMessageBox.critical(self, 'error', '전송 후 받은 파일이 없습니다....', QMessageBox.Yes)
         else:
-            print('check')
             self.listen_button.setEnabled(True)
     ################################################################
 
@@ -469,12 +467,18 @@ class ConfigWindow(QDialog):
 
     def clicked_yes(self):
         output_device = self.output_combo.currentText()
-        self.output_device = int(output_device.split(' ')[4])
-        self.output_signal.emit(self.output_device)
+        if output_device == '':
+            self.output_device = -1
+        else:
+            self.output_device = int(output_device.split(' ')[4])
+            self.output_signal.emit(self.output_device)
 
         input_device = self.input_combo.currentText()
-        self.input_device = int(input_device.split(' ')[4])
-        self.input_signal.emit(self.input_device)
+        if input_device == '':
+            self.output_device = -1
+        else:
+            self.input_device = int(input_device.split(' ')[4])
+            self.input_signal.emit(self.input_device)
 
         self.close()
 
