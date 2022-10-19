@@ -1,4 +1,5 @@
 import socket
+import sys
 import time
 from _thread import *
 import argparse
@@ -77,5 +78,7 @@ class AudioServer:
                     print('수신 성공 .....')
                     self.send_audio(conn)
                     print('송신 성공 ......')
+            except KeyboardInterrupt:
+                return
             except:
                 continue
