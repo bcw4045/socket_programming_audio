@@ -21,6 +21,9 @@ class Audio_Client(client.AudioClient):
     def __init__(self, port, ip):
         super().__init__(port, ip)
 
+    def __del__(self):
+        self.p.terminate()
+
     # 메소드 오버라이딩
     def set_input_device(self):
         audio = pyaudio.PyAudio()
@@ -50,14 +53,12 @@ class Audio_Client(client.AudioClient):
     def listening_audio(self, device, frames):
         sound = np.array(frames)
         sound_bytes = sound.tobytes()
-        print(device)
         stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
                               rate=self.fs, output=True,
                               output_device_index=device)
         stream2.write(sound_bytes)
         stream2.stop_stream()
         stream2.close()
-        self.p.terminate()
         print(f'저장된 녹음의 재생이 끝났습니다....')
 
 
