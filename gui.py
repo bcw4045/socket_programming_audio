@@ -109,11 +109,12 @@ class MyApp(QWidget):
         self.ip_line = QLineEdit(self)
 
         vbox_label = QVBoxLayout()
-        vbox_label.addWidget(port_label)
-        vbox_label.addWidget(self.port_line)
 
         vbox_label.addWidget(ip_label)
         vbox_label.addWidget(self.ip_line)
+
+        vbox_label.addWidget(port_label)
+        vbox_label.addWidget(self.port_line)
 
         ##################################################
 
@@ -171,31 +172,24 @@ class MyApp(QWidget):
 
         ########### 전송, 재생 버튼 ####################
         hbox2 = QHBoxLayout()
-        self.transfer_button = QPushButton('전송하기', self)
-        self.listen_button = QPushButton('재생하기', self)
+        self.transfer_button = QPushButton('전송 및 재생', self)
+        # self.listen_button = QPushButton('재생하기', self)
 
         self.transfer_button.setEnabled(False)
-        self.listen_button.setEnabled(False)
+        # self.listen_button.setEnabled(False)
         self.config.setEnabled(False)
 
         self.transfer_button.clicked.connect(self.clicked_transfer)
-        self.listen_button.clicked.connect(self.clicked_transfer_listen)
+        # self.listen_button.clicked.connect(self.clicked_transfer_listen)
 
         hbox2.addStretch(1)
         hbox2.addWidget(self.transfer_button)
         hbox2.addStretch(1)
-        hbox2.addWidget(self.listen_button)
-        hbox2.addStretch(1)
+        # hbox2.addWidget(self.listen_button)
+        # hbox2.addStretch(1)
 
 
         ############################################
-
-        ############## progressbar #################
-        # self.pbr = QProgressBar(self)
-        # self.pbr.setValue(24)
-        # self.timer = QBasicTimer()
-        # self.finished = False
-        ###########################################
 
         ############ 상태 라벨 추가 ############
         status_layout = QVBoxLayout()
@@ -224,8 +218,6 @@ class MyApp(QWidget):
         main_layout.addStretch(1)
         main_layout.addLayout(hbox_button)
         main_layout.addStretch(1)
-        # main_layout.addWidget(self.pbr)
-        # main_layout.addStretch(1)
         main_layout.addLayout(hbox2)
         main_layout.addStretch(1)
         main_layout.addLayout(status_layout)
@@ -337,7 +329,7 @@ class MyApp(QWidget):
         self.record_label.setText("녹음된 음성이 있습니다..")
 
         if len(self.frames) == 0:
-            QMessageBox.information(self, "녹음된 음성이 없습니다...")
+            QMessageBox.information(self, 'inform', "녹음된 음성이 없습니다...")
             self.record_button.setEnabled(True)
             return
         else:
@@ -349,7 +341,6 @@ class MyApp(QWidget):
     def clicked_listen(self):
         device = self.output_device
         self.AudioClient.listening_audio(device, self.frames)
-        QMessageBox.information(self, 'inform', '녹음된 음성이 모두 재생되었습니다....', QMessageBox.Yes)
 
     ##################################################################
 
@@ -357,21 +348,15 @@ class MyApp(QWidget):
 
     def clicked_transfer(self):
         self.AudioClient.send_audio(self.frames)
-        QMessageBox.information(self, '전송 알림', '전송이 완료되었습니다.....', QMessageBox.Yes)
         self.receive_data = self.AudioClient.receive_audio()
 
         if len(self.receive_data) == 0:
             QMessageBox.critical(self, 'error', '전송 후 받은 파일이 없습니다....', QMessageBox.Yes)
         else:
-            self.listen_button.setEnabled(True)
-    ################################################################
+            device = self.output_device
+            self.AudioClient.listening_audio(device, self.receive_data)
 
-    #################### 전송된 음성 재생 이벤트 #####################
-    def clicked_transfer_listen(self):
-        device = self.output_device
-        self.AudioClient.listening_audio(device, self.receive_data)
-        QMessageBox.information(self, 'inform', '전송 받은 음성이 모두 재생되었습니다....', QMessageBox.Yes)
-    #############################################################
+    ################################################################
 
 
 ##### Record Thread와 Config Dialog ################
