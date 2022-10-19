@@ -50,6 +50,7 @@ class Audio_Client(client.AudioClient):
     def listening_audio(self, device, frames):
         sound = np.array(frames)
         sound_bytes = sound.tobytes()
+        print(device)
         stream2 = self.p.open(format=self.p.get_format_from_width(width=2), channels=1,
                               rate=self.fs, output=True,
                               output_device_index=device)
@@ -105,8 +106,9 @@ class MyApp(QWidget):
         port_label = QLabel('Port', self)
         ip_label = QLabel('Ip', self)
 
-        self.port_line = QLineEdit(self)
         self.ip_line = QLineEdit(self)
+        self.port_line = QLineEdit(self)
+
 
         vbox_label = QVBoxLayout()
 
@@ -173,20 +175,20 @@ class MyApp(QWidget):
         ########### 전송, 재생 버튼 ####################
         hbox2 = QHBoxLayout()
         self.transfer_button = QPushButton('전송 및 재생', self)
-        # self.listen_button = QPushButton('재생하기', self)
+        self.listen_button = QPushButton('다시듣기', self)
 
         self.transfer_button.setEnabled(False)
-        # self.listen_button.setEnabled(False)
+        self.listen_button.setEnabled(False)
         self.config.setEnabled(False)
 
         self.transfer_button.clicked.connect(self.clicked_transfer)
-        # self.listen_button.clicked.connect(self.clicked_transfer_listen)
+        self.listen_button.clicked.connect(self.clicked_transfer_listen)
 
         hbox2.addStretch(1)
         hbox2.addWidget(self.transfer_button)
         hbox2.addStretch(1)
-        # hbox2.addWidget(self.listen_button)
-        # hbox2.addStretch(1)
+        hbox2.addWidget(self.listen_button)
+        hbox2.addStretch(1)
 
 
         ############################################
@@ -266,9 +268,8 @@ class MyApp(QWidget):
         self.conn_label.setText('Disconnect....')
         self.disconn_button.setEnabled(False)
         self.conn_button.setEnabled(True)
-
-        self.record_button.setEnabled(False)
         self.listen_button.setEnabled(False)
+        self.record_button.setEnabled(False)
         self.transfer_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.record_listen_button.setEnabled(False)
@@ -355,8 +356,15 @@ class MyApp(QWidget):
         else:
             device = self.output_device
             self.AudioClient.listening_audio(device, self.receive_data)
+            self.listen_button.setEnabled(True)
 
     ################################################################
+
+    #################### 전송된 음성 재생 이벤트 #####################
+    def clicked_transfer_listen(self):
+        device = self.output_device
+        self.AudioClient.listening_audio(device, self.receive_data)
+    #############################################################
 
 
 ##### Record Thread와 Config Dialog ################
