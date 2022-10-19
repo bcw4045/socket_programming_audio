@@ -332,6 +332,7 @@ class MyApp(QWidget):
         if len(self.frames) == 0:
             QMessageBox.information(self, 'inform', "녹음된 음성이 없습니다...")
             self.record_button.setEnabled(True)
+            self.transfer_button.setEnabled(False)
             return
         else:
             self.record_listen_button.setEnabled(True)
